@@ -70,18 +70,24 @@ export async function POST(req: Request) {
       photo: image_url,
     };
 
-    const newUser = await createUser(user);
+    try {
+      const newUser = await createUser(user);
 
-    // Set public metadata
-    if (newUser) {
-      await clerkClient.users.updateUserMetadata(id, {
-        publicMetadata: {
-          userId: newUser._id,
-        },
+      if (newUser) {
+        await clerkClient.users.updateUserMetadata(id, {
+          publicMetadata: {
+            userId: newUser._id,
+          },
+        });
+      }
+
+      return NextResponse.json({ message: "OK", user: newUser });
+    } catch (error) {
+      console.error("Error creating user in webhook:", error);
+      return new Response("Error occured while creating user", {
+        status: 500,
       });
     }
-
-    return NextResponse.json({ message: "OK", user: newUser });
   }
 
   // UPDATE
